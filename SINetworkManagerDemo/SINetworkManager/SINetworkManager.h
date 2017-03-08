@@ -13,9 +13,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 ///网络状态变化时发出通知
 FOUNDATION_EXPORT NSString *const SINetworkStatusDidChangeNotification ;
+FOUNDATION_EXPORT NSString *const SINetworkingReachabilityNotificationStatusItem ;
 
 typedef NS_ENUM(NSInteger,SINetworkStatusType) {
-    SINetworkStatusUnknow = 0,          ///< 未知网络
+    SINetworkStatusUnknow = -1,          ///< 未知网络
     SINetworkStatusNotReachable,        ///< 无网络
     SINetworkStatusReachableViaWWAN,    ///< 蜂窝网络
     SINetworkStatusReachableViaWiFi,    ///< wifi

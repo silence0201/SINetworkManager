@@ -19,7 +19,8 @@
 
 #define force_inline __inline__ __attribute__((always_inline))
 
-NSString *const SINetworkStatusDidChangeNotification = @"SINetworkingReachabilityDidChangeNotification";
+NSString * const SINetworkStatusDidChangeNotification = @"com.alamofire.networking.reachability.change" ;
+NSString * const SINetworkingReachabilityNotificationStatusItem = @"AFNetworkingReachabilityNotificationStatusItem" ;
 
 #pragma mark - 来自YYKit的XML解析
 #pragma mark -
@@ -264,7 +265,6 @@ static YYCache *_networkCache ;
 
 #pragma mark ---- SINetworkManager
 static NSString *const SINetworkDefaultCookie = @"SINetworkDefaultCookie";
-static SINetworkStatusType _currentNetworkStatus ;
 static dispatch_semaphore_t _semaphore ;
 static SINetworkConfig *_config ;
 static AFHTTPSessionManager *_sessionManager;
@@ -272,40 +272,10 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
 @implementation SINetworkManager
 
 #pragma mark --- 初始化
-+ (void)load{
-    _currentNetworkStatus = SINetworkStatusUnknow ;
-    _semaphore = dispatch_semaphore_create(1);
-}
-
 + (void)initialize{
-    // 设置监听网络变化
+    _semaphore = dispatch_semaphore_create(1);
     [[AFNetworkReachabilityManager sharedManager] startMonitoring] ;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(networkStatusChanged:) name:AFNetworkingReachabilityDidChangeNotification object:nil] ;
 }
-
-+ (void)networkStatusChanged:(NSNotification *)noti{
-    NSNumber *number = [noti.userInfo objectForKey:AFNetworkingReachabilityNotificationStatusItem] ;
-    // 判断是什么类型
-    switch ([number integerValue]) {
-        case 0:
-            _currentNetworkStatus = SINetworkStatusNotReachable ;
-            break ;
-        case 1:
-            _currentNetworkStatus = SINetworkStatusReachableViaWWAN ;
-            break ;
-        case 2:
-            _currentNetworkStatus = SINetworkStatusReachableViaWiFi ;
-            break ;
-        default:
-            _currentNetworkStatus = SINetworkStatusUnknow ;
-            break;
-    }
-    
-    // 发送通知
-    [[NSNotificationCenter defaultCenter] postNotificationName:SINetworkStatusDidChangeNotification object:nil userInfo:noti.userInfo] ;
-}
-
-
 #pragma mark --- 网络状态
 + (BOOL)isNetwork{
     return [AFNetworkReachabilityManager sharedManager].reachable ;
@@ -320,7 +290,20 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
 }
 
 + (SINetworkStatusType)networkStatusType{
-    return _currentNetworkStatus ;
+    if (![self isNetwork]) {
+        return SINetworkStatusNotReachable ;
+    }
+    if ([self isWiFiNetwork]) {
+        return SINetworkStatusReachableViaWiFi ;
+    }
+    
+    if ([self isWWANNetwork]){
+        return SINetworkStatusReachableViaWWAN ;
+    }
+    
+    return SINetworkStatusUnknow;
+    
+    
 }
 
 + (void)networkStatusChageWithBlock:(SINetworkStatusBlock)block{

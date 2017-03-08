@@ -17,14 +17,16 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    NSLog(@"当前网络状态：%ld",[SINetworkManager networkStatusType]);
     [SINetworkManager GET:@"https://www.v2ex.com/api/topics/hot.json" parameters:nil succeess:^(NSURLSessionDataTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
         
     } failure:^(NSURLSessionDataTask * _Nonnull task, NSError * _Nonnull error) {
         
     }] ;
+    
     [SINetworkManager networkStatusChageWithBlock:^(SINetworkStatusType status) {
-        NSLog(@"当前网络状态：%ld",status);
-    }] ;
+        NSLog(@"%ld",status) ;
+    }];
 }
 
 - (void)networkStatusChange {
