@@ -58,6 +58,7 @@
 		E8D0852C1E7015BB005D63A3 /* SINetworkManagerDemo */ = {
 			isa = PBXGroup;
 			children = (
+				E8D085441E7015D5005D63A3 /* SINetworkManager */,
 				E8D085301E7015BB005D63A3 /* AppDelegate.h */,
 				E8D085311E7015BB005D63A3 /* AppDelegate.m */,
 				E8D085331E7015BB005D63A3 /* ViewController.h */,
@@ -77,6 +78,13 @@
 				E8D0852E1E7015BB005D63A3 /* main.m */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E8D085441E7015D5005D63A3 /* SINetworkManager */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = SINetworkManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
