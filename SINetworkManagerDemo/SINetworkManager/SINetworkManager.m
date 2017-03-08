@@ -9,9 +9,10 @@
 #import "SINetworkManager.h"
 #import <YYCache/YYCache.h>
 
+
+#pragma mark --- SINetworkCache
 static NSString *const NetworkCacheName = @"SINetworkCache" ;
 static YYCache *_networkCache ;
-
 @implementation SINetworkCache
 
 + (void)initialize{
@@ -24,7 +25,8 @@ static YYCache *_networkCache ;
 }
 
 + (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters{
-    return [self cacheForURL:url parameters:parameters withBlock:nil] ;
+    NSString *cacheKey = [self _keyWithURL:url paramters:parameters] ;
+    return  [_networkCache objectForKey:cacheKey] ;
 }
 
 + (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters withBlock:(SIRequestCacheBlock)block{
@@ -63,7 +65,48 @@ static YYCache *_networkCache ;
 
 @end
 
+#pragma mark ---- SINetworkConfig
+@implementation SINetworkConfig{
+    NSMutableDictionary *_httpHeaderDic ;
+}
 
++ (instancetype)defaultConfig{
+    static SINetworkConfig *config = nil ;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        config = [[self alloc]init] ;
+    });
+    return config ;
+}
+
+- (instancetype)init{
+    if (self = [super init]) {
+        _httpHeaderDic = [NSMutableDictionary dictionary] ;
+    }
+    return self ;
+}
+
+- (NSTimeInterval)timeoutInterval{
+    return _timeoutInterval ? : 30 ;
+}
+
+- (BOOL)networkActivityIndicatorEnabled{
+    return _networkActivityIndicatorEnabled ? : YES ;
+}
+
+- (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field{
+    [_httpHeaderDic setValue:value forKey:field] ;
+}
+
+- (NSDictionary *)allHTTPHeaderFields{
+    return _httpHeaderDic.copy ;
+}
+
+@end
+
+#pragma mark ---- SINetworkManager
 @implementation SINetworkManager
 @end
+
+
 
