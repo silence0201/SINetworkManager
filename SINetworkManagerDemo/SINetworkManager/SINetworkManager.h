@@ -8,6 +8,18 @@
 
 #import <Foundation/Foundation.h>
 
+@interface SINetworkCache : NSObject
+
++ (void)setCache:(id)data URL:(NSString *)url parameters:(NSDictionary *)parameters ;
+
++ (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters ;
+
++ (NSInteger)getAllCacheSize ;
+
++ (void)removeAllCache ;
+
+@end
+
 @interface SINetworkManager : NSObject
 
 @end
