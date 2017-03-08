@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "SINetworkManager.h"
 
 @interface ViewController ()
 
@@ -16,8 +17,19 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [SINetworkManager GET:@"https://www.v2ex.com/api/topics/hot.json" parameters:nil succeess:^(NSURLSessionDataTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+        
+    } failure:^(NSURLSessionDataTask * _Nonnull task, NSError * _Nonnull error) {
+        
+    }] ;
+    [SINetworkManager networkStatusChageWithBlock:^(SINetworkStatusType status) {
+        NSLog(@"当前网络状态：%ld",status);
+    }] ;
 }
 
+- (void)networkStatusChange {
+    // NSLog(@"当前网络状态：%ld",[SINetworkManager networkStatusType]);
+}
 
 
 @end
