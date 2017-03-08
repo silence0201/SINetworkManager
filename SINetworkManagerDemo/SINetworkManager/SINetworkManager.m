@@ -24,9 +24,21 @@ static YYCache *_networkCache ;
 }
 
 + (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters{
+    return [self cacheForURL:url parameters:parameters withBlock:nil] ;
+}
+
++ (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters withBlock:(SIRequestCacheBlock)block{
     NSString *cacheKey = [self _keyWithURL:url paramters:parameters] ;
+    if(block){
+        [_networkCache objectForKey:cacheKey withBlock:^(NSString * _Nonnull key, id<NSCoding>  _Nonnull object) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                block(object) ;
+            }) ;
+        }] ;
+    }
     return  [_networkCache objectForKey:cacheKey] ;
 }
+
 
 + (void)removeAllCache{
     [_networkCache.diskCache removeAllObjects] ;
