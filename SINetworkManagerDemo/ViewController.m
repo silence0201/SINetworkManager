@@ -18,9 +18,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSLog(@"当前网络状态：%ld",[SINetworkManager networkStatusType]);
-    [SINetworkManager GET:@"https://www.v2ex.com/api/topics/hot.json" parameters:nil succeess:^(NSURLSessionDataTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+    [SINetworkManager GET:@"https://www.v2ex.com/api/topics/hot.json" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
         
-    } failure:^(NSURLSessionDataTask * _Nonnull task, NSError * _Nonnull error) {
+    } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
         
     }] ;
     

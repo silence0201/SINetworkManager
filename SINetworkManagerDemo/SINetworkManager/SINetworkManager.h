@@ -7,7 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "SINetworkCache.h"
+#import "SINetworkConfig.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -22,72 +23,10 @@ typedef NS_ENUM(NSInteger,SINetworkStatusType) {
     SINetworkStatusReachableViaWiFi,    ///< wifi
 };
 
-
-typedef NS_ENUM(NSInteger,SIRequestSerializerType){
-    SIRequestSerializerHTTP = 0, ///< 请求的数据格式为二进制数据
-    SIRequestSerializerJSON     ///< 请求数据为JSON格式
-};
-
-typedef NS_ENUM(NSInteger,SIResponseSerializerType){
-    SIResponseSerializerHTTP = 0, ///< 返回的数据格式为二进制数据
-    SIResponseSerializerJSON,     ///< 返回数据为JSON格式
-    SIResponseSerializerXML       ///< 返回的数据为XML
-};
-
-
-
-typedef void(^SIRequestCacheBlock)(id responseCache) ; ///>  缓存Block
 typedef void(^SINetworkStatusBlock)(SINetworkStatusType status) ; ///> 网络状态发生改变
-typedef void(^SIRequestSuccessBlock)(NSURLSessionDataTask *task, NSDictionary *responseObject); ///> 请求成功的block
-typedef void(^SIRequestFailureBlock)(NSURLSessionDataTask *task, NSError *error); ///> 请求失败的block
+typedef void(^SIRequestSuccessBlock)(NSURLSessionTask *task, NSDictionary *responseObject); ///> 请求成功的block
+typedef void(^SIRequestFailureBlock)(NSURLSessionTask *task, NSError *error); ///> 请求失败的block
 typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
-@interface SINetworkCache : NSObject
-
-/// 设置缓存
-+ (void)setCache:(id)data URL:(NSString *)url parameters:(NSDictionary *)parameters ;
-
-/// 获取缓存
-+ (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters ;
-/// 获取缓存带有回调
-+ (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters withBlock:(SIRequestCacheBlock)block ;
-
-/// 获取缓存的大小
-+ (NSInteger)getAllCacheSize ;
-/// 删除所有的缓存
-+ (void)removeAllCache ;
-
-@end
-
-@interface SINetworkConfig : NSObject
-
-/// 根地址,默认为空,如果需要设置需要创建新的Config
-@property (nonatomic,copy) NSString *baseURL ;
-/// 公共参数
-@property (nonatomic,copy) NSDictionary *commonParas ;
-/// 超时时间,默认为30s
-@property (nonatomic,assign) NSTimeInterval timeoutInterval ;
-
-/// 请求数据类型,默认是二进制类型
-@property (nonatomic,assign) SIRequestSerializerType requestSerializerType ;
-/// 返回数据类型,默认是二进制
-@property (nonatomic,assign) SIResponseSerializerType responseSerializerType ;
-
-/// 是否显示转动的菊花
-@property (nonatomic,assign) BOOL networkActivityIndicatorEnabled ;
-/// 是否使用Cookie
-@property (nonatomic,assign) BOOL cookieEnabled ;
-/// 是否打开调试信息
-@property (nonatomic,assign) BOOL debugLogEnable ;
-
-/// 请求头信息
-@property (nonatomic,readonly,copy) NSDictionary *allHTTPHeaderFields ;
-/// 设置请求头信息
-- (void)setValue:(NSString *)value forHTTPHeaderField:(nonnull NSString *)field ;
-
-/// 默认设置
-+ (instancetype)defaultConfig ;
-
-@end
 
 @interface SINetworkManager : NSObject
 
@@ -144,9 +83,9 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  @return 返回当前的task
  */
 + (NSURLSessionTask *)GET:(NSString *)url
-               parameters:(NSDictionary *)parameters
-                 succeess:(SIRequestSuccessBlock)success
-                  failure:(SIRequestFailureBlock)failure;
+               parameters:(nullable NSDictionary *)parameters
+                 succeess:(nullable SIRequestSuccessBlock)success
+                  failure:(nullable SIRequestFailureBlock)failure;
 
 /**
  带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
@@ -161,11 +100,11 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  @return 返回当前task
  */
 + (NSURLSessionTask *)GET:(NSString *)url
-               parameters:(NSDictionary *)parameters
-                 progress:(SIRequestProgressBlock)progress
-            cacheResponse:(SIRequestCacheBlock)cacheResponse
-                 succeess:(SIRequestSuccessBlock)success
-                  failure:(SIRequestFailureBlock)failure;
+               parameters:(nullable NSDictionary *)parameters
+                 progress:(nullable SIRequestProgressBlock)progress
+            cacheResponse:(nullable SIRequestCacheBlock)cacheResponse
+                 succeess:(nullable SIRequestSuccessBlock)success
+                  failure:(nullable SIRequestFailureBlock)failure;
 
 /**
  不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
@@ -177,9 +116,9 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  @return 返回当前task
  */
 + (NSURLSessionTask *)POST:(NSString *)url
-                parameters:(NSDictionary *)parameters
-                   success:(SIRequestSuccessBlock)success
-                   failure:(SIRequestFailureBlock)failure;
+                parameters:(nullable NSDictionary *)parameters
+                   success:(nullable SIRequestSuccessBlock)success
+                   failure:(nullable SIRequestFailureBlock)failure;
 
 /**
  不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
@@ -193,11 +132,11 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  @return 返回当前task
  */
 + (NSURLSessionTask *)POST:(NSString *)url
-                parameters:(NSDictionary *)parameters
-                  progress:(SIRequestProgressBlock)progress
-             cacheResponse:(SIRequestCacheBlock)cacheResponse
-                   success:(SIRequestSuccessBlock)success
-                   failure:(SIRequestFailureBlock)failure;
+                parameters:(nullable NSDictionary *)parameters
+                  progress:(nullable SIRequestProgressBlock)progress
+             cacheResponse:(nullable SIRequestCacheBlock)cacheResponse
+                   success:(nullable SIRequestSuccessBlock)success
+                   failure:(nullable SIRequestFailureBlock)failure;
 
 /**
  上传文件
@@ -212,12 +151,12 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  @return 返回当前的task
  */
 + (NSURLSessionTask *)uploadFileWithURL:(NSString *)url
-                             parameters:(NSDictionary *)parameters
+                             parameters:(nullable NSDictionary *)parameters
                                    name:(NSString *)name
                                filePath:(NSString *)path
-                               progress:(SIRequestProgressBlock)progress
-                                success:(SIRequestSuccessBlock)success
-                                failure:(SIRequestFailureBlock)failure;
+                               progress:(nullable SIRequestProgressBlock)progress
+                                success:(nullable SIRequestSuccessBlock)success
+                                failure:(nullable SIRequestFailureBlock)failure;
 
 /**
  上传图片
@@ -235,15 +174,15 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  @return 返回当前的Task
  */
 + (NSURLSessionTask *)uploadImageWithURL:(NSString *)url
-                              parameters:(NSDictionary *)parameters
+                              parameters:(nullable NSDictionary *)parameters
                                     name:(NSString *)name
                              maxFileSize:(double)size
                                   images:(NSArray *)images
                                fileNames:(NSArray *)fileNames
                                imageType:(NSString *)imageType
-                                progress:(SIRequestProgressBlock)progress
-                                 success:(SIRequestSuccessBlock)success
-                                 failure:(SIRequestFailureBlock)failure;
+                                progress:(nullable SIRequestProgressBlock)progress
+                                 success:(nullable SIRequestSuccessBlock)success
+                                 failure:(nullable SIRequestFailureBlock)failure;
 
 
 /**
@@ -258,9 +197,9 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
  */
 + (NSURLSessionTask *)downloadWithURL:(NSString *)URL
                               fileDir:(NSString *)fileDir
-                             progress:(SIRequestProgressBlock)progress
-                              success:(void(^)(NSString *filePath))success
-                              failure:(SIRequestFailureBlock)failure;
+                             progress:(nullable SIRequestProgressBlock)progress
+                              success:(nullable void(^)(NSString *filePath))success
+                              failure:(nullable SIRequestFailureBlock)failure;
 
 #pragma mark - Task cancel
 #pragma mark -

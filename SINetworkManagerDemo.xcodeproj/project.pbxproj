@@ -15,6 +15,8 @@
 		E8D085381E7015BB005D63A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8D085361E7015BB005D63A3 /* Main.storyboard */; };
 		E8D0853A1E7015BB005D63A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8D085391E7015BB005D63A3 /* Assets.xcassets */; };
 		E8D0853D1E7015BB005D63A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8D0853B1E7015BB005D63A3 /* LaunchScreen.storyboard */; };
+		E8F129B81E71601C00FD33FE /* SINetworkConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F129B71E71601C00FD33FE /* SINetworkConfig.m */; };
+		E8F129BB1E7160AD00FD33FE /* SINetworkCache.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F129BA1E7160AD00FD33FE /* SINetworkCache.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +35,10 @@
 		E8D085391E7015BB005D63A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E8D0853C1E7015BB005D63A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E8D0853E1E7015BB005D63A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E8F129B61E71601C00FD33FE /* SINetworkConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SINetworkConfig.h; sourceTree = "<group>"; };
+		E8F129B71E71601C00FD33FE /* SINetworkConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SINetworkConfig.m; sourceTree = "<group>"; };
+		E8F129B91E7160AD00FD33FE /* SINetworkCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SINetworkCache.h; sourceTree = "<group>"; };
+		E8F129BA1E7160AD00FD33FE /* SINetworkCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SINetworkCache.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +75,10 @@
 			children = (
 				E8B18EF31E7108F300EBF203 /* SINetworkManager.h */,
 				E8B18EF41E7108F300EBF203 /* SINetworkManager.m */,
+				E8F129B61E71601C00FD33FE /* SINetworkConfig.h */,
+				E8F129B71E71601C00FD33FE /* SINetworkConfig.m */,
+				E8F129B91E7160AD00FD33FE /* SINetworkCache.h */,
+				E8F129BA1E7160AD00FD33FE /* SINetworkCache.m */,
 			);
 			path = SINetworkManager;
 			sourceTree = "<group>";
@@ -242,6 +252,8 @@
 				E8D085321E7015BB005D63A3 /* AppDelegate.m in Sources */,
 				E8B18EF51E7108F300EBF203 /* SINetworkManager.m in Sources */,
 				E8D0852F1E7015BB005D63A3 /* main.m in Sources */,
+				E8F129B81E71601C00FD33FE /* SINetworkConfig.m in Sources */,
+				E8F129BB1E7160AD00FD33FE /* SINetworkCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
