@@ -31,6 +31,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 @interface SINetworkManager : NSObject
 
 #pragma mark --- 网络状态
+#pragma mark -
 /// 网络是否可用
 + (BOOL)isNetwork ;
 /// 是不是蜂窝煤网络
@@ -43,6 +44,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 + (void)networkStatusChageWithBlock:(SINetworkStatusBlock)block ;
 
 #pragma mark --- 重置AFHTTPSessionManager相关属性
+#pragma mark -
 /// 设置config,如果需要设置新的BaseURL需要设置新的Config
 + (void)setConfig:(SINetworkConfig *)config ;
 /// 可获取当前的Config,某些属性设置就可以生效,但是不推荐使用
@@ -71,8 +73,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
 
 #pragma mark --- 请求数据
-
-
+#pragma mark -
 /**
  不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
 

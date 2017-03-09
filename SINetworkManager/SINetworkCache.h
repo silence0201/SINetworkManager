@@ -8,9 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void(^SIRequestCacheBlock)(id responseCache) ; ///>  缓存Block
+typedef void(^SIRequestCacheBlock)(id responseCache) ;///>  缓存Block
 
-
+/** 缓存 */
 @interface SINetworkCache : NSObject
 
 /// 设置缓存

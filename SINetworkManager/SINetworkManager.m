@@ -11,7 +11,7 @@
 #import <AFNetworking/AFNetworkActivityIndicatorManager.h>
 
 #ifdef DEBUG
-#define SILog(...) printf("\n***********************start****************************\n[%s] %s [第%d行]\n%s\n*********************end********************************\n", __TIME__ ,__PRETTY_FUNCTION__ ,__LINE__, [[NSString stringWithFormat:__VA_ARGS__] UTF8String])
+#define SILog(...)      printf("\n***********************start****************************\n[%s] %s [第%d行]\n%s\n*********************end********************************\n", __TIME__ ,__PRETTY_FUNCTION__ ,__LINE__, [[NSString stringWithFormat:__VA_ARGS__] UTF8String])
 #else
 #define SILog(...)
 #endif

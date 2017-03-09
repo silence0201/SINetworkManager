@@ -21,6 +21,7 @@ typedef NS_ENUM(NSInteger,SIResponseSerializerType){
 
 NS_ASSUME_NONNULL_BEGIN
 
+/** 配置 */
 @interface SINetworkConfig : NSObject
 
 /// 根地址,默认为空,如果需要设置需要创建新的Config
@@ -39,8 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,assign) BOOL networkActivityIndicatorEnabled ;
 /// 是否使用Cookie
 @property (nonatomic,assign) BOOL cookieEnabled ;
-/// 是否打开调试信息
-@property (nonatomic,assign) BOOL debugLogEnable ;
 
 /// 请求头信息
 @property (nonatomic,readonly,copy) NSDictionary *allHTTPHeaderFields ;
