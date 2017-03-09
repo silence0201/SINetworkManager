@@ -17,16 +17,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSLog(@"当前网络状态：%ld",[SINetworkManager networkStatusType]);
-    [SINetworkManager GET:@"https://www.v2ex.com/api/topics/hot.json" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
-        
+    [SINetworkManager setResponseSerializer:SIResponseSerializerXML] ;
+    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/note.xml" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
     } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
         
     }] ;
-    
-    [SINetworkManager networkStatusChageWithBlock:^(SINetworkStatusType status) {
-        NSLog(@"%ld",status) ;
-    }];
 }
 
 - (void)networkStatusChange {

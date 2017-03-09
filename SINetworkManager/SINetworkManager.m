@@ -273,27 +273,27 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
 }
 
 + (void)setRequestSerializer:(SIRequestSerializerType)requestSerializer{
-    _config.requestSerializerType = requestSerializer ;
-    _sessionManager.requestSerializer = requestSerializer == SIRequestSerializerHTTP ? [AFHTTPRequestSerializer serializer] : [AFJSONRequestSerializer serializer] ;
+    [self sharedConfig].requestSerializerType = requestSerializer ;
+    [self manager].requestSerializer = requestSerializer == SIRequestSerializerHTTP ? [AFHTTPRequestSerializer serializer] : [AFJSONRequestSerializer serializer] ;
 }
 
 + (void)setResponseSerializer:(SIResponseSerializerType)responseSerializer{
-    _config.responseSerializerType = responseSerializer ;
-    _sessionManager.responseSerializer = responseSerializer == SIRequestSerializerJSON ? [AFJSONResponseSerializer serializer] : [AFHTTPResponseSerializer serializer] ;
+    [self sharedConfig].responseSerializerType = responseSerializer ;
+    [self manager].responseSerializer = responseSerializer == SIRequestSerializerJSON ? [AFJSONResponseSerializer serializer] : [AFHTTPResponseSerializer serializer] ;
 }
 
 + (void)setRequestTimeoutInterval:(NSTimeInterval)time{
-    _config.timeoutInterval = time ;
-    _sessionManager.requestSerializer.timeoutInterval = time ;
+    [self sharedConfig].timeoutInterval = time ;
+    [self manager].requestSerializer.timeoutInterval = time ;
 }
 
 + (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field{
-    [_config setValue:value forHTTPHeaderField:field] ;
-    [_sessionManager.requestSerializer setValue:value forHTTPHeaderField:field] ;
+    [[self sharedConfig] setValue:value forHTTPHeaderField:field] ;
+    [[self manager].requestSerializer setValue:value forHTTPHeaderField:field] ;
 }
 
 + (void)openNetworkActivityIndicator:(BOOL)open{
-    _config.networkActivityIndicatorEnabled = open ;
+    [self sharedConfig].networkActivityIndicatorEnabled = open ;
     [[AFNetworkActivityIndicatorManager sharedManager] setEnabled:open] ;
 }
 
@@ -309,7 +309,7 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
     // 如置为NO，建议自己添加对应域名的校验逻辑。
     securityPolicy.validatesDomainName = validatesDomainName ;
     securityPolicy.pinnedCertificates = [[NSSet alloc]initWithObjects:cerData, nil] ;
-    [_sessionManager setSecurityPolicy:securityPolicy] ;
+    [[self manager] setSecurityPolicy:securityPolicy] ;
 }
 
 #pragma mark ---Private
@@ -337,9 +337,7 @@ static force_inline void removeSessionDownTask(__unsafe_unretained NSURLSessionD
     dispatch_semaphore_signal(_semaphore) ;
 }
 
-static force_inline void networkCookieConfig(){
-    _config.cookieEnabled ? setCookie() : nil;
-}
+
 
 static force_inline void setCookie(){
     NSData *cookiesdata = [[NSUserDefaults standardUserDefaults] objectForKey:SINetworkDefaultCookie];
@@ -358,6 +356,10 @@ static force_inline void showNetworkActivityIndicator(){
 
 static force_inline void hideNetworkActivityIndicator(){
     [AFNetworkActivityIndicatorManager sharedManager].enabled = NO;
+}
+
++ (void)networkCookieConfig{
+    [self sharedConfig].cookieEnabled ? setCookie() : nil;
 }
 
 + (void)logRequestCancel:(NSURLSessionDataTask *)task para:(NSDictionary *)para {
@@ -394,7 +396,7 @@ static force_inline void hideNetworkActivityIndicator(){
     }
     
     // 转化为XML需要规定
-    if(_config.responseSerializerType == SIResponseSerializerXML){
+    if([self sharedConfig].responseSerializerType == SIResponseSerializerXML){
         _YYXMLDictionaryParser *parser = [[_YYXMLDictionaryParser alloc] initWithData:data];
         NSDictionary *dic = [parser result];
         if ([NSJSONSerialization isValidJSONObject:dic]) {
@@ -435,7 +437,7 @@ static force_inline void hideNetworkActivityIndicator(){
     if(cacheResponse){
         cacheResponse([SINetworkCache cacheForURL:url parameters:parameters]) ;
     }
-    networkCookieConfig();
+    [self networkCookieConfig];
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
     NSURLSessionDataTask *task = [[self manager] GET:url parameters:newParam progress:^(NSProgress * _Nonnull downloadProgress) {
@@ -471,7 +473,7 @@ static force_inline void hideNetworkActivityIndicator(){
 
 + (NSURLSessionTask *)POST:(NSString *)url parameters:(NSDictionary *)parameters progress:(SIRequestProgressBlock)progress cacheResponse:(SIRequestCacheBlock)cacheResponse success:(SIRequestSuccessBlock)success failure:(SIRequestFailureBlock)failure{
     cacheResponse ? cacheResponse([SINetworkCache cacheForURL:url parameters:parameters]) : nil;
-    networkCookieConfig();
+    [self networkCookieConfig] ;
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
     NSURLSessionDataTask *sessionTask = [[self manager] POST:url parameters:newParam progress:^(NSProgress * _Nonnull uploadProgress) {
@@ -508,10 +510,10 @@ static force_inline void hideNetworkActivityIndicator(){
                                progress:(SIRequestProgressBlock)progress
                                 success:(SIRequestSuccessBlock)success
                                 failure:(SIRequestFailureBlock)failure{
-    networkCookieConfig();
+    [self networkCookieConfig] ;
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
-    NSURLSessionDataTask *sessionTask = [_sessionManager POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    NSURLSessionDataTask *sessionTask = [[self manager] POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         NSError *error = nil;
         [formData appendPartWithFileURL:[NSURL URLWithString:path] name:name error:&error];
         (failure && error) ? failure(nil,error) : nil;
@@ -567,10 +569,10 @@ static force_inline void hideNetworkActivityIndicator(){
     }
     NSAssert(images.count == fileNames.count, @"图片和文件名数量须相等");
     
-    networkCookieConfig();
+    [self networkCookieConfig] ;
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
-    NSURLSessionDataTask *sessionTask = [_sessionManager POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+    NSURLSessionDataTask *sessionTask = [[self manager] POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         for (int i = 0; i < images.count; i++) {
             NSData *data;
             if (size > 0) {
@@ -610,9 +612,9 @@ static force_inline void hideNetworkActivityIndicator(){
 
 + (NSURLSessionTask *)downloadWithURL:(NSString *)URL fileDir:(NSString *)fileDir progress:(SIRequestProgressBlock)progress success:(void (^)(NSString * _Nonnull))success failure:(SIRequestFailureBlock)failure{
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:URL]];
-    networkCookieConfig();
+    [self networkCookieConfig] ;
     showNetworkActivityIndicator();
-    NSURLSessionDownloadTask *task = [_sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+    NSURLSessionDownloadTask *task = [[self manager] downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
         //下载进度
         dispatch_sync(dispatch_get_main_queue(), ^{
             progress ? progress(downloadProgress) : nil;
