@@ -162,6 +162,17 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                                 success:(SIRequestSuccessBlock)success
                                 failure:(SIRequestFailureBlock)failure;
 
++ (NSURLSessionTask *)uploadImageWithURL:(NSString *)url
+                              parameters:(NSDictionary *)parameters
+                                    name:(NSString *)name
+                             maxFileSize:(double)size
+                                  images:(NSArray *)images
+                               fileNames:(NSArray *)fileNames
+                               imageType:(NSString *)imageType
+                                progress:(SIRequestProgressBlock)progress
+                                 success:(SIRequestSuccessBlock)success
+                                 failure:(SIRequestFailureBlock)failure;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -263,6 +263,11 @@ static YYCache *_networkCache ;
 
 @end
 
+#pragma mark --- UIImage compress
+@interface UIImage (Compress)
+- (NSData *)zipImageWithMaxSize:(CGFloat)size ;
+@end
+
 #pragma mark ---- SINetworkManager
 static NSString *const SINetworkDefaultCookie = @"SINetworkDefaultCookie";
 static dispatch_semaphore_t _semaphore ;
@@ -332,7 +337,7 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
 #pragma mark --- AFHTTPSessionManager
 + (AFHTTPSessionManager *)manager{
     if (!_sessionManager) {
-         [self setConfig:[SINetworkConfig defaultConfig]] ;
+         [self setConfig:[self sharedConfig]] ;
     }
     return _sessionManager ;
 }
@@ -353,6 +358,9 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
 }
 
 + (SINetworkConfig *)sharedConfig{
+    if(!_config){
+        _config = [SINetworkConfig defaultConfig] ;
+    }
     return _config ;
 }
 
@@ -508,9 +516,9 @@ static force_inline void hideNetworkActivityIndicator(){
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
     NSURLSessionDataTask *task = [[self manager] GET:url parameters:newParam progress:^(NSProgress * _Nonnull downloadProgress) {
-        if (progress) {
-            progress(downloadProgress) ;
-        }
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            progress ? progress(downloadProgress) : nil;
+        });
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         removeSessionDataTask(task);
         hideNetworkActivityIndicator();
@@ -544,9 +552,9 @@ static force_inline void hideNetworkActivityIndicator(){
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
     NSURLSessionDataTask *sessionTask = [[self manager] POST:url parameters:newParam progress:^(NSProgress * _Nonnull uploadProgress) {
-        if(progress){
-            progress(uploadProgress) ;
-        }
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            progress ? progress(uploadProgress) : nil;
+        });
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         hideNetworkActivityIndicator();
         removeSessionDataTask(task);
@@ -568,6 +576,145 @@ static force_inline void hideNetworkActivityIndicator(){
     }];
     addSessionDataTask(sessionTask);
     return sessionTask;
+}
+
++ (NSURLSessionTask *)uploadFileWithURL:(NSString *)url
+                             parameters:(NSDictionary *)parameters
+                                   name:(NSString *)name
+                               filePath:(NSString *)path
+                               progress:(SIRequestProgressBlock)progress
+                                success:(SIRequestSuccessBlock)success
+                                failure:(SIRequestFailureBlock)failure{
+    networkCookieConfig();
+    showNetworkActivityIndicator();
+    NSDictionary *newParam = [self addCommonParameters:parameters];
+    NSURLSessionDataTask *sessionTask = [_sessionManager POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        NSError *error = nil;
+        [formData appendPartWithFileURL:[NSURL URLWithString:path] name:name error:&error];
+        (failure && error) ? failure(nil,error) : nil;
+        error ? NSLog(@"上传失败") : nil;
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            progress ? progress(uploadProgress) : nil;
+        });
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        hideNetworkActivityIndicator();
+        NSDictionary *result = [self convertResponse:responseObject withTask:task];
+        success ? success(task, result) : nil;
+        removeSessionDataTask(task);
+        [self logRequestSuccess:task para:parameters response:result];
+        
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        removeSessionDataTask(task);
+        hideNetworkActivityIndicator();
+        if (error.code == -999 ) {
+            [self logRequestCancel:task para:parameters];
+            return ;
+        } else {
+            failure ? failure(task,error) : nil;
+            [self logRequestFailure:task para:parameters error:error];
+        }
+    }];
+    addSessionDataTask(sessionTask);
+    return sessionTask;
+}
+
++ (NSURLSessionTask *)uploadImageWithURL:(NSString *)url
+                              parameters:(NSDictionary *)parameters
+                                    name:(NSString *)name
+                             maxFileSize:(double)size
+                                  images:(NSArray *)images
+                               fileNames:(NSArray *)fileNames
+                               imageType:(NSString *)imageType
+                                progress:(SIRequestProgressBlock)progress
+                                 success:(SIRequestSuccessBlock)success
+                                 failure:(SIRequestFailureBlock)failure{
+    NSAssert(images.count == fileNames.count, @"图片和文件名数量须相等");
+    NSAssert(images.count != 0, @"图片不能为空");
+    networkCookieConfig();
+    showNetworkActivityIndicator();
+    NSDictionary *newParam = [self addCommonParameters:parameters];
+    NSURLSessionDataTask *sessionTask = [_sessionManager POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+        for (int i = 0; i < images.count; i++) {
+            NSData *data;
+            if (size) {
+                UIImage *image = images[i] ;
+                data = [image zipImageWithMaxSize:size] ;
+            } else {
+                data = UIImageJPEGRepresentation(images[i],1);
+            }
+            
+            [formData appendPartWithFileData:data name:name fileName:fileNames[i] mimeType:imageType ? : [NSString stringWithFormat:@"image/jpg"]];
+        }
+    } progress:^(NSProgress * _Nonnull uploadProgress) {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            progress ? progress(uploadProgress) : nil;
+        });
+    } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+        hideNetworkActivityIndicator();
+        removeSessionDataTask(task);
+        NSDictionary *result = [self convertResponse:responseObject withTask:task];
+        success ? success(task, result) : nil;
+        [self logRequestSuccess:task para:parameters response:result];
+        
+    } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+        removeSessionDataTask(task);
+        hideNetworkActivityIndicator();
+        if (error.code == -999 ) {
+            [self logRequestCancel:task para:parameters];
+            return ;
+        } else {
+            failure ? failure(task,error) : nil;
+            [self logRequestFailure:task para:parameters error:error];
+        }
+    }];
+    addSessionDataTask(sessionTask);
+    return sessionTask;
+
+}
+
+@end
+
+
+
+
+@implementation UIImage (Compress)
+
+- (NSData *)zipImageWithMaxSize:(CGFloat)size{
+    if (!self) {
+        return nil;
+    }
+    CGFloat maxFileSize = size*1024*1024;
+    CGFloat compression = 0.9f;
+    NSData *compressedData = UIImageJPEGRepresentation(self, compression);
+    
+    while ([compressedData length] > maxFileSize) {
+        compression *= 0.9;
+        compressedData = UIImageJPEGRepresentation ([self compressWithNewWidth:self.size.width*compression],compression) ;
+    }
+    return compressedData;
+}
+
+- (UIImage *)compressWithNewWidth:(CGFloat)newWidth{
+    if (!self) return nil;
+    float imageWidth = self.size.width;
+    float imageHeight = self.size.height;
+    float width = newWidth;
+    float height = self.size.height/(self.size.width/width);
+    
+    float widthScale = imageWidth /width;
+    float heightScale = imageHeight /height;
+    
+    UIGraphicsBeginImageContext(CGSizeMake(width, height));
+    if (widthScale > heightScale) {
+        [self drawInRect:CGRectMake(0, 0, imageWidth /heightScale , height)];
+    } else {
+        [self drawInRect:CGRectMake(0, 0, width , imageHeight /widthScale)];
+    }
+    
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return newImage;
 }
 
 @end
