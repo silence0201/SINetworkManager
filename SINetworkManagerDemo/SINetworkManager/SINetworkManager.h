@@ -43,13 +43,17 @@ typedef void(^SIRequestFailureBlock)(NSURLSessionDataTask *task, NSError *error)
 typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 @interface SINetworkCache : NSObject
 
+/// 设置缓存
 + (void)setCache:(id)data URL:(NSString *)url parameters:(NSDictionary *)parameters ;
 
+/// 获取缓存
 + (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters ;
+/// 获取缓存带有回调
 + (id)cacheForURL:(NSString *)url parameters:(NSDictionary *)parameters withBlock:(SIRequestCacheBlock)block ;
 
+/// 获取缓存的大小
 + (NSInteger)getAllCacheSize ;
-
+/// 删除所有的缓存
 + (void)removeAllCache ;
 
 @end
@@ -120,22 +124,42 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 + (void)openNetworkActivityIndicator:(BOOL)open ;
 
 /**
- 配置自建证书的Https请求, 参考链接: http://blog.csdn.net/syg90178aw/article/details/52839103
+ 配置自建证书的Https请求, 参考链接: http://www.jianshu.com/p/97745be81d64
 
  @param cerPath 自建Https证书的路径
- @param validatesDomainName 是否需要验证域名，默认为YES. 如果证书的域名与请求的域名不一致，需设置为NO; 即服务器使用其他可信任机构颁发
- 的证书，也可以建立连接，这个非常危险, 建议打开.validatesDomainName=NO, 主要用于这种情况:客户端请求的是子域名, 而证书上的是另外
- 一个域名。因为SSL证书上的域名是独立的,假如证书上注册的域名是www.google.com, 那么mail.google.com是无法验证通过的.
+ @param validatesDomainName 是否需要验证域名，默认为YES. 如果证书的域名与请求的域名不一致，需设置为NO;
  */
 + (void)setSecurityPolicyWithCerPath:(NSString *)cerPath validatesDomainName:(BOOL)validatesDomainName;
 
 #pragma mark --- 请求数据
 
+
+/**
+ 不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+
+ @param url 请求地址
+ @param parameters 请求参数
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前的task
+ */
 + (NSURLSessionTask *)GET:(NSString *)url
                parameters:(NSDictionary *)parameters
                  succeess:(SIRequestSuccessBlock)success
                   failure:(SIRequestFailureBlock)failure;
 
+/**
+ 带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+
+
+ @param url 请求地址
+ @param parameters 请求参数
+ @param progress 进度回调
+ @param cacheResponse 缓存回调
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前task
+ */
 + (NSURLSessionTask *)GET:(NSString *)url
                parameters:(NSDictionary *)parameters
                  progress:(SIRequestProgressBlock)progress
@@ -143,11 +167,31 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                  succeess:(SIRequestSuccessBlock)success
                   failure:(SIRequestFailureBlock)failure;
 
+/**
+ 不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+
+ @param url 请求地址
+ @param parameters 请求参数
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前task
+ */
 + (NSURLSessionTask *)POST:(NSString *)url
                 parameters:(NSDictionary *)parameters
                    success:(SIRequestSuccessBlock)success
                    failure:(SIRequestFailureBlock)failure;
 
+/**
+ 不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+
+ @param url 请求地址
+ @param parameters 请求参数
+ @param progress 进度回调
+ @param cacheResponse 缓存回调
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前task
+ */
 + (NSURLSessionTask *)POST:(NSString *)url
                 parameters:(NSDictionary *)parameters
                   progress:(SIRequestProgressBlock)progress
@@ -155,6 +199,18 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                    success:(SIRequestSuccessBlock)success
                    failure:(SIRequestFailureBlock)failure;
 
+/**
+ 上传文件
+
+ @param url 上传地址
+ @param parameters 上传参数
+ @param name 对应服务器的name
+ @param path 本地沙盒路径
+ @param progress 进度回调
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前的task
+ */
 + (NSURLSessionTask *)uploadFileWithURL:(NSString *)url
                              parameters:(NSDictionary *)parameters
                                    name:(NSString *)name
@@ -163,6 +219,21 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                                 success:(SIRequestSuccessBlock)success
                                 failure:(SIRequestFailureBlock)failure;
 
+/**
+ 上传图片
+
+ @param url 上传地址
+ @param parameters 上传参数
+ @param name 文件对应服务器的name
+ @param size 需要压缩上传文件的大小,如果大于0则压缩
+ @param images 图片数组
+ @param fileNames 图片文件名数组,如果为空默认nil
+ @param imageType 图片类型
+ @param progress 进度回调
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前的Task
+ */
 + (NSURLSessionTask *)uploadImageWithURL:(NSString *)url
                               parameters:(NSDictionary *)parameters
                                     name:(NSString *)name
@@ -174,6 +245,17 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                                  success:(SIRequestSuccessBlock)success
                                  failure:(SIRequestFailureBlock)failure;
 
+
+/**
+ 下载文件
+
+ @param URL 请求地址
+ @param fileDir 文件保存目录,默认为缓存目录下Download文件夹
+ @param progress 进度回调
+ @param success 成功回调
+ @param failure 失败回调
+ @return 返回当前Task
+ */
 + (NSURLSessionTask *)downloadWithURL:(NSString *)URL
                               fileDir:(NSString *)fileDir
                              progress:(SIRequestProgressBlock)progress

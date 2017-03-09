@@ -395,7 +395,10 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
     AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate] ;
     // 如果需要验证自建证书(无效证书),需要设置为YES
     securityPolicy.allowInvalidCertificates = YES ;
-    // 是否需要验证域名,默认是YES
+    // validatesDomainName 是否需要验证域名，默认为YES;
+    // 假如证书的域名与你请求的域名不一致，需把该项设置为NO；如设成NO的话，即服务器使用其他可信任机构颁发的证书，也可以建立连接，这个非常危险，建议打开。
+    // 置为NO，主要用于这种情况：客户端请求的是子域名，而证书上的是另外一个域名。因为SSL证书上的域名是独立的，假如证书上注册的域名是www.google.com，那么mail.google.com是无法验证通过的；当然，有钱可以注册通配符的域名*.google.com，但这个还是比较贵的。
+    // 如置为NO，建议自己添加对应域名的校验逻辑。
     securityPolicy.validatesDomainName = validatesDomainName ;
     securityPolicy.pinnedCertificates = [[NSSet alloc]initWithObjects:cerData, nil] ;
     [_sessionManager setSecurityPolicy:securityPolicy] ;
@@ -662,7 +665,7 @@ static force_inline void hideNetworkActivityIndicator(){
     NSURLSessionDataTask *sessionTask = [_sessionManager POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         for (int i = 0; i < images.count; i++) {
             NSData *data;
-            if (size) {
+            if (size > 0) {
                 UIImage *image = images[i] ;
                 data = [image zipImageWithMaxSize:size] ;
             } else {
