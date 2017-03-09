@@ -173,6 +173,19 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                                  success:(SIRequestSuccessBlock)success
                                  failure:(SIRequestFailureBlock)failure;
 
++ (NSURLSessionTask *)downloadWithURL:(NSString *)URL
+                              fileDir:(NSString *)fileDir
+                             progress:(SIRequestProgressBlock)progress
+                              success:(void(^)(NSString *filePath))success
+                              failure:(SIRequestFailureBlock)failure;
+
+#pragma mark - Task cancel
+#pragma mark -
+/// 取消请求对应URL的请求，取消的请求不再回调数据
++ (void)cancelTaskWithURL:(NSString *)URL;
+/// 取消所有请求,取消的请求不再回调数据
++ (void)cancelAllTask;
+
 @end
 
 NS_ASSUME_NONNULL_END

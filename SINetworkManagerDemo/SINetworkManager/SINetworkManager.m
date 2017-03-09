@@ -408,7 +408,19 @@ static force_inline void addSessionDataTask(__unsafe_unretained NSURLSessionData
     dispatch_semaphore_signal(_semaphore) ;
 }
 
+static force_inline void addSessionDownTask(__unsafe_unretained  NSURLSessionDownloadTask*task){
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER) ;
+    [_allSessionTask addObject:task];
+    dispatch_semaphore_signal(_semaphore) ;
+}
+
 static force_inline void removeSessionDataTask(__unsafe_unretained NSURLSessionDataTask *task){
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER) ;
+    [_allSessionTask removeObject:task];
+    dispatch_semaphore_signal(_semaphore) ;
+}
+
+static force_inline void removeSessionDownTask(__unsafe_unretained NSURLSessionDownloadTask *task){
     dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER) ;
     [_allSessionTask removeObject:task];
     dispatch_semaphore_signal(_semaphore) ;
@@ -629,8 +641,21 @@ static force_inline void hideNetworkActivityIndicator(){
                                 progress:(SIRequestProgressBlock)progress
                                  success:(SIRequestSuccessBlock)success
                                  failure:(SIRequestFailureBlock)failure{
-    NSAssert(images.count == fileNames.count, @"图片和文件名数量须相等");
     NSAssert(images.count != 0, @"图片不能为空");
+    // 默认时间命名
+    if(!fileNames){
+        NSMutableArray *array = [NSMutableArray array] ;
+        for (int i = 0 ; i < images.count;i++ ){
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            formatter.dateFormat = @"yyyyMMddHHmmss";
+            NSString *str = [formatter stringFromDate:[NSDate date]];
+            NSString *imageFileName = [NSString stringWithFormat:@"%@%d.%@",str,i,imageType?:@"jpg"];
+            [array addObject:imageFileName] ;
+        }
+        fileNames = array ;
+    }
+    NSAssert(images.count == fileNames.count, @"图片和文件名数量须相等");
+    
     networkCookieConfig();
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
@@ -670,8 +695,66 @@ static force_inline void hideNetworkActivityIndicator(){
     }];
     addSessionDataTask(sessionTask);
     return sessionTask;
-
 }
+
++ (NSURLSessionTask *)downloadWithURL:(NSString *)URL fileDir:(NSString *)fileDir progress:(SIRequestProgressBlock)progress success:(void (^)(NSString * _Nonnull))success failure:(SIRequestFailureBlock)failure{
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:URL]];
+    networkCookieConfig();
+    showNetworkActivityIndicator();
+    NSURLSessionDownloadTask *task = [_sessionManager downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+        //下载进度
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            progress ? progress(downloadProgress) : nil;
+        });
+    } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+        //拼接缓存目录
+        NSString *downloadDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:fileDir ? fileDir : @"Download"];
+        //打开文件管理器
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        //创建Download目录
+        [fileManager createDirectoryAtPath:downloadDir withIntermediateDirectories:YES attributes:nil error:nil];
+        //拼接文件路径
+        NSString *filePath = [downloadDir stringByAppendingPathComponent:response.suggestedFilename];
+        //返回文件位置的URL路径
+        return [NSURL fileURLWithPath:filePath];
+        
+    } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+        hideNetworkActivityIndicator();
+        removeSessionDownTask(task);
+        if(failure && error) {failure(task,error) ; return ;};
+        success ? success(filePath.absoluteString /** NSURL->NSString*/) : nil;
+    }];
+    //开始下载
+    [task resume];
+    // 添加sessionTask到数组
+    task ? addSessionDownTask(task): nil ;
+    return task;
+}
+
+#pragma mark --- 取消请求
++ (void)cancelTaskWithURL:(NSString *)URL {
+    if (!URL) return;
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER) ;
+    [_allSessionTask enumerateObjectsUsingBlock:^(NSURLSessionTask * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj.currentRequest.URL.absoluteString containsString:URL]) {
+            [obj cancel];
+            [_allSessionTask removeObject:obj];
+            //*stop = YES; //考虑在一个时间段向同一URL发起多次请求的情况
+        }
+    }];
+    dispatch_semaphore_signal(_semaphore) ;
+}
+
+
++ (void)cancelAllTask {
+    dispatch_semaphore_wait(_semaphore, DISPATCH_TIME_FOREVER) ;
+    [_allSessionTask enumerateObjectsUsingBlock:^(NSURLSessionTask * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj cancel];
+    }];
+    [_allSessionTask removeAllObjects];
+    dispatch_semaphore_signal(_semaphore) ;
+}
+
 
 @end
 
