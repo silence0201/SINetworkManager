@@ -755,6 +755,46 @@ static force_inline void hideNetworkActivityIndicator(){
     dispatch_semaphore_signal(_semaphore) ;
 }
 
+#pragma mark - cookie 设置
++ (void)getCookie:(NSString *)url{
+    // 获取并保存cookie
+    NSArray *cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL:[NSURL URLWithString:url]] ;
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:cookies];
+    [[NSUserDefaults standardUserDefaults] setObject:data forKey:SINetworkDefaultCookie];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
++ (void)setLocalCookieWithCookieName:(NSArray *)names values:(NSArray *)values originURL:(NSString *)url expires:(NSTimeInterval)expires {
+#if DEBUG
+    NSAssert(names.count == values.count && names.count != 0, @"name和value须一一对应且不为空");
+#else
+    if (names.count != values.count || names.count == 0) return;
+#endif
+    for (int i = 0; i < names.count; i++) {
+        NSDictionary *property = @{NSHTTPCookieName :names[i],
+                                   NSHTTPCookieValue : values[i],
+                                   NSHTTPCookieOriginURL : url,
+                                   NSHTTPCookieExpires : [NSDate dateWithTimeIntervalSinceNow:expires]};
+        NSHTTPCookie *cookie = [NSHTTPCookie cookieWithProperties:property];
+        [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:cookie];
+    }
+}
+
+///清除cookie
++ (void)clearCookie {
+    NSData *cookiesdata = [[NSUserDefaults standardUserDefaults] objectForKey:SINetworkDefaultCookie];
+    if([cookiesdata length]) {
+        NSArray *cookies = [NSKeyedUnarchiver unarchiveObjectWithData:cookiesdata];
+        NSHTTPCookie *cookie;
+        for (cookie in cookies) {
+            [[NSHTTPCookieStorage sharedHTTPCookieStorage] deleteCookie:cookie];
+            [[NSURLCache sharedURLCache] removeAllCachedResponses];
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:SINetworkDefaultCookie];
+            [[NSUserDefaults standardUserDefaults] synchronize];
+        }
+    }
+}
+
 
 @end
 

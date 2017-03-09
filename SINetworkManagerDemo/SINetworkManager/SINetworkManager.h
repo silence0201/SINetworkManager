@@ -56,7 +56,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 
 @interface SINetworkConfig : NSObject
 
-/// 根地址
+/// 根地址,默认为空,如果需要设置需要创建新的Config
 @property (nonatomic,copy) NSString *baseURL ;
 /// 公共参数
 @property (nonatomic,copy) NSDictionary *commonParas ;
@@ -100,8 +100,9 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 + (void)networkStatusChageWithBlock:(SINetworkStatusBlock)block ;
 
 #pragma mark --- 重置AFHTTPSessionManager相关属性
-/// 设置config
+/// 设置config,如果需要设置新的BaseURL需要设置新的Config
 + (void)setConfig:(SINetworkConfig *)config ;
+/// 可获取当前的Config,某些属性设置就可以生效,但是不推荐使用
 + (SINetworkConfig *)sharedConfig;
 
 /// 设置请求参数格式
@@ -185,6 +186,20 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 + (void)cancelTaskWithURL:(NSString *)URL;
 /// 取消所有请求,取消的请求不再回调数据
 + (void)cancelAllTask;
+
+#pragma mark - cookie 设置
+#pragma mark -
+
+///获取当前请求服务端返回的cookie
++ (void)getCookie:(NSString *)url;
+
+/// 给请求设置Cookie,需要在Config中设置cookieEnabled为YES才能使用
++ (void)setLocalCookieWithCookieName:(NSArray *)names
+                              values:(NSArray *)values
+                           originURL:(NSString *)url
+                             expires:(NSTimeInterval)expires;
+/// 删除cookie
++ (void)clearCookie;
 
 @end
 
