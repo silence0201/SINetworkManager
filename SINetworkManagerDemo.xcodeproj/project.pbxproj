@@ -8,19 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		E0475A1B096A4A055FC2A837 /* libPods-SINetworkManagerDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73033150C9C6309C05F02F36 /* libPods-SINetworkManagerDemo.a */; };
+		E8B18EF51E7108F300EBF203 /* SINetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E8B18EF41E7108F300EBF203 /* SINetworkManager.m */; };
 		E8D0852F1E7015BB005D63A3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D0852E1E7015BB005D63A3 /* main.m */; };
 		E8D085321E7015BB005D63A3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D085311E7015BB005D63A3 /* AppDelegate.m */; };
 		E8D085351E7015BB005D63A3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D085341E7015BB005D63A3 /* ViewController.m */; };
 		E8D085381E7015BB005D63A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8D085361E7015BB005D63A3 /* Main.storyboard */; };
 		E8D0853A1E7015BB005D63A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8D085391E7015BB005D63A3 /* Assets.xcassets */; };
 		E8D0853D1E7015BB005D63A3 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E8D0853B1E7015BB005D63A3 /* LaunchScreen.storyboard */; };
-		E8D085471E701906005D63A3 /* SINetworkManager.m in Sources */ = {isa = PBXBuildFile; fileRef = E8D085461E701906005D63A3 /* SINetworkManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		6B791ED114789E51A957CBEB /* Pods-SINetworkManagerDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SINetworkManagerDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SINetworkManagerDemo/Pods-SINetworkManagerDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		73033150C9C6309C05F02F36 /* libPods-SINetworkManagerDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SINetworkManagerDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF1CFD86CB159FE67895A6D3 /* Pods-SINetworkManagerDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SINetworkManagerDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-SINetworkManagerDemo/Pods-SINetworkManagerDemo.release.xcconfig"; sourceTree = "<group>"; };
+		E8B18EF31E7108F300EBF203 /* SINetworkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SINetworkManager.h; sourceTree = "<group>"; };
+		E8B18EF41E7108F300EBF203 /* SINetworkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SINetworkManager.m; sourceTree = "<group>"; };
 		E8D0852A1E7015BB005D63A3 /* SINetworkManagerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SINetworkManagerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8D0852E1E7015BB005D63A3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		E8D085301E7015BB005D63A3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -31,8 +33,6 @@
 		E8D085391E7015BB005D63A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E8D0853C1E7015BB005D63A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E8D0853E1E7015BB005D63A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E8D085451E701906005D63A3 /* SINetworkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SINetworkManager.h; sourceTree = "<group>"; };
-		E8D085461E701906005D63A3 /* SINetworkManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SINetworkManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +64,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E8B18EF21E7108F300EBF203 /* SINetworkManager */ = {
+			isa = PBXGroup;
+			children = (
+				E8B18EF31E7108F300EBF203 /* SINetworkManager.h */,
+				E8B18EF41E7108F300EBF203 /* SINetworkManager.m */,
+			);
+			path = SINetworkManager;
+			sourceTree = "<group>";
+		};
 		E8D085211E7015BB005D63A3 = {
 			isa = PBXGroup;
 			children = (
@@ -85,7 +94,7 @@
 		E8D0852C1E7015BB005D63A3 /* SINetworkManagerDemo */ = {
 			isa = PBXGroup;
 			children = (
-				E8D085441E7015D5005D63A3 /* SINetworkManager */,
+				E8B18EF21E7108F300EBF203 /* SINetworkManager */,
 				E8D085301E7015BB005D63A3 /* AppDelegate.h */,
 				E8D085311E7015BB005D63A3 /* AppDelegate.m */,
 				E8D085331E7015BB005D63A3 /* ViewController.h */,
@@ -105,15 +114,6 @@
 				E8D0852E1E7015BB005D63A3 /* main.m */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		E8D085441E7015D5005D63A3 /* SINetworkManager */ = {
-			isa = PBXGroup;
-			children = (
-				E8D085451E701906005D63A3 /* SINetworkManager.h */,
-				E8D085461E701906005D63A3 /* SINetworkManager.m */,
-			);
-			path = SINetworkManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -240,7 +240,7 @@
 			files = (
 				E8D085351E7015BB005D63A3 /* ViewController.m in Sources */,
 				E8D085321E7015BB005D63A3 /* AppDelegate.m in Sources */,
-				E8D085471E701906005D63A3 /* SINetworkManager.m in Sources */,
+				E8B18EF51E7108F300EBF203 /* SINetworkManager.m in Sources */,
 				E8D0852F1E7015BB005D63A3 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -400,6 +400,7 @@
 				E8D085431E7015BB005D63A3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
