@@ -167,10 +167,6 @@ NSString * const SINetworkingReachabilityNotificationStatusItem = @"AFNetworking
 @end
 
 
-#pragma mark --- SINetworkCache
-
-#pragma mark ---- SINetworkConfig
-
 #pragma mark --- UIImage compress
 @interface UIImage (Compress)
 - (NSData *)zipImageWithMaxSize:(CGFloat)size ;
@@ -252,16 +248,20 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
 
 + (void)setConfig:(SINetworkConfig *)config{
     _config = config ;
-    _allSessionTask = [NSMutableArray array] ;
+    if(_allSessionTask){
+        [self cancelAllTask] ;
+    }else{
+        _allSessionTask = [NSMutableArray array] ;
+    }
     // 所有请求公用一个AFHTTPSessionManager
     _sessionManager = [[AFHTTPSessionManager alloc]initWithBaseURL:[NSURL URLWithString:_config.baseURL]] ;
     _sessionManager.requestSerializer.timeoutInterval = _config.timeoutInterval ;
-    [_config.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
-        [_sessionManager.requestSerializer setValue:obj forHTTPHeaderField:key] ;
-    }] ;
     _sessionManager.requestSerializer = _config.requestSerializerType == 0 ? [AFHTTPRequestSerializer serializer] : [AFJSONRequestSerializer serializer];
     _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
     _sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html", @"text/json", @"text/plain", @"text/javascript", @"text/xml", @"image/*", nil] ;
+    [_config.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        [_sessionManager.requestSerializer setValue:obj forHTTPHeaderField:key] ;
+    }] ;
     [[AFNetworkActivityIndicatorManager sharedManager] setEnabled:_config.networkActivityIndicatorEnabled] ;
 }
 
@@ -516,7 +516,7 @@ static force_inline void hideNetworkActivityIndicator(){
     NSURLSessionDataTask *sessionTask = [[self manager] POST:url parameters:newParam constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
         NSError *error = nil;
         [formData appendPartWithFileURL:[NSURL URLWithString:path] name:name error:&error];
-        (failure && error) ? failure(nil,error) : nil;
+        (failure && error) ? failure([NSURLSessionDataTask new],error) : nil;
         error ? NSLog(@"上传失败") : nil;
     } progress:^(NSProgress * _Nonnull uploadProgress) {
         dispatch_sync(dispatch_get_main_queue(), ^{
@@ -528,7 +528,6 @@ static force_inline void hideNetworkActivityIndicator(){
         success ? success(task, result) : nil;
         removeSessionDataTask(task);
         [self logRequestSuccess:task para:parameters response:result];
-        
     } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
         removeSessionDataTask(task);
         hideNetworkActivityIndicator();
@@ -581,7 +580,6 @@ static force_inline void hideNetworkActivityIndicator(){
             } else {
                 data = UIImageJPEGRepresentation(images[i],1);
             }
-            
             [formData appendPartWithFileData:data name:name fileName:fileNames[i] mimeType:imageType ? : [NSString stringWithFormat:@"image/jpg"]];
         }
     } progress:^(NSProgress * _Nonnull uploadProgress) {

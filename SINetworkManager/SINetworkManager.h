@@ -45,7 +45,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 
 #pragma mark --- 重置AFHTTPSessionManager相关属性
 #pragma mark -
-/// 设置config,如果需要设置新的BaseURL需要设置新的Config
+/// 设置config,如果需要设置新的BaseURL需要设置新的Config,会生成新的Manager对象,会取消当前队列的所有请求
 + (void)setConfig:(SINetworkConfig *)config ;
 /// 可获取当前的Config,某些属性设置就可以生效,但是不推荐使用
 + (SINetworkConfig *)sharedConfig;

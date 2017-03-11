@@ -22,10 +22,6 @@
     } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
         
     }] ;
-    
-    SINetworkConfig *config = [[SINetworkConfig alloc]init] ;
-    config.debugLogEnable = NO ;
-    NSLog(@"%ld",config.debugLogEnable) ;
 
 }
 
