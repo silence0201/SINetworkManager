@@ -23,6 +23,12 @@
         
     }] ;
 
+    [SINetworkManager setResponseSerializer:SIResponseSerializerJSON] ;
+    [SINetworkManager GET:@"https://api.douban.com/v2/movie/coming_soon" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+        NSLog(@"请求成功:%@",responseObject) ;
+    } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
+        NSLog(@"请求失败:%@",error) ;
+    }] ;
 }
 
 - (void)networkStatusChange {
