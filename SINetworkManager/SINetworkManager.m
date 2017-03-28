@@ -612,7 +612,8 @@ static force_inline void hideNetworkActivityIndicator(){
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:URL]];
     [self networkCookieConfig] ;
     showNetworkActivityIndicator();
-    NSURLSessionDownloadTask *task = [[self manager] downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
+    NSURLSessionDownloadTask *task ;
+    task = [[self manager] downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
         //下载进度
         dispatch_sync(dispatch_get_main_queue(), ^{
             progress ? progress(downloadProgress) : nil;
