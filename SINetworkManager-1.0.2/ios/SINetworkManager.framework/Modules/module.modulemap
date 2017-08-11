@@ -1,0 +1,6 @@
+framework module SINetworkManager {
+  umbrella header "SINetworkManager.h"
+
+  export *
+  module * { export * }
+}
