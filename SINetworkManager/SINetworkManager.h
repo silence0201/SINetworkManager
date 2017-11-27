@@ -74,7 +74,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 #pragma mark --- 请求数据
 #pragma mark -
 /**
- 不带缓存的GET请求,数据会自动转换字典,如果转换失败,会以@{@"result":reponse}格式返回
+ 不读取缓存的GET请求,数据会自动转换字典,如果转换失败,会以@{@"result":reponse}格式返回
 
  @param url 请求地址
  @param parameters 请求参数
@@ -88,7 +88,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                   failure:(nullable SIRequestFailureBlock)failure;
 
 /**
- 带缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
+ 读取缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
 
 
  @param url 请求地址
@@ -107,7 +107,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                   failure:(nullable SIRequestFailureBlock)failure;
 
 /**
- 不带缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
+ 不读取缓存的POST请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
 
  @param url 请求地址
  @param parameters 请求参数
@@ -121,7 +121,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                    failure:(nullable SIRequestFailureBlock)failure;
 
 /**
- 带缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
+ 读取缓存的POST请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
 
  @param url 请求地址
  @param parameters 请求参数

@@ -172,12 +172,6 @@ NSString * const SINetworkingReachabilityNotificationStatusItem = @"AFNetworking
 - (NSData *)zipImageWithMaxSize:(CGFloat)size ;
 @end
 
-#pragma mark --- URLQueryString
-@interface NSDictionary (URL)
-/// 将NSDictionary转换成url参数字符串
-- (NSString *)URLQueryString;
-@end
-
 #pragma mark ---- SINetworkManager
 static NSString *const SINetworkDefaultCookie = @"SINetworkDefaultCookie";
 static dispatch_semaphore_t _semaphore ;
@@ -741,24 +735,6 @@ static force_inline void hideNetworkActivityIndicator(){
 
 @end
 
-@implementation NSDictionary (URL)
-
-- (NSString *)URLQueryString{
-    NSMutableString *string = [NSMutableString string];
-    for (NSString *key in [self allKeys]){
-        if ([string length]){
-            [string appendString:@"&"];
-        }
-        CFStringRef escaped = CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)[[self objectForKey:key] description],
-                                                                      NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                                                      kCFStringEncodingUTF8);
-        [string appendFormat:@"%@=%@", key, escaped];
-        CFRelease(escaped);
-    }
-    return string;
-}
-
-@end
 
 @implementation UIImage (Compress)
 
