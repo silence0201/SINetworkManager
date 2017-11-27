@@ -12,9 +12,11 @@ A NetworkManager With AFNetworking And YYCache
 # 用法
 
 1. 导入头文件
+
 	```objective-c
 	#import "SINetworkManager.h"
 	```
+
 2. 监听网络变化
 		
 	```objective-c
@@ -46,15 +48,21 @@ A NetworkManager With AFNetworking And YYCache
     }] ;
     ```
     	
-6. 如果数据为XML,需要设置解析为XML
+6. 如果数据为XML,自动解析
 
 
 	```objective-c
-	[SINetworkManager setResponseSerializer:SIResponseSerializerXML] ;
-    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/note.xml" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/plant_catalog.xml" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
     } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
         
     }] ;
+    ```
+    
+7. 缓存支持,会自动在结果后面添加cacheTime作为判断是否有效
+
+	```objective-c
+    NSDictionary *cache1 = [SINetworkCache cacheForURL:@"http://www.w3school.com.cn/example/xmle/plant_catalog.xml"  parameters:nil];
+    NSLog(@"%@",cache1);
     ```
     	
 
