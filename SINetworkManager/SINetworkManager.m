@@ -172,12 +172,19 @@ NSString * const SINetworkingReachabilityNotificationStatusItem = @"AFNetworking
 - (NSData *)zipImageWithMaxSize:(CGFloat)size ;
 @end
 
+#pragma mark --- URLQueryString
+@interface NSDictionary (URL)
+/// 将NSDictionary转换成url参数字符串
+- (NSString *)URLQueryString;
+@end
+
 #pragma mark ---- SINetworkManager
 static NSString *const SINetworkDefaultCookie = @"SINetworkDefaultCookie";
 static dispatch_semaphore_t _semaphore ;
 static SINetworkConfig *_config ;
 static AFHTTPSessionManager *_sessionManager;
-static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
+static NSMutableArray <NSURLSessionTask *>*_allSessionTask;   // 所有的请求任务
+static BOOL _logEnable = YES;   // 是否打印日志,默认为YES
 @implementation SINetworkManager
 
 #pragma mark --- 初始化
@@ -211,8 +218,6 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
     }
     
     return SINetworkStatusUnknow;
-    
-    
 }
 
 + (void)networkStatusChageWithBlock:(SINetworkStatusBlock)block{
@@ -255,10 +260,11 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
     }
     // 所有请求公用一个AFHTTPSessionManager
     _sessionManager = [[AFHTTPSessionManager alloc]initWithBaseURL:[NSURL URLWithString:_config.baseURL]] ;
+    _sessionManager.requestSerializer = [AFHTTPRequestSerializer serializer];
     _sessionManager.requestSerializer.timeoutInterval = _config.timeoutInterval ;
-    _sessionManager.requestSerializer = _config.requestSerializerType == 0 ? [AFHTTPRequestSerializer serializer] : [AFJSONRequestSerializer serializer];
     _sessionManager.responseSerializer = [AFHTTPResponseSerializer serializer];
     _sessionManager.responseSerializer.acceptableContentTypes = [NSSet setWithObjects:@"application/json", @"text/html", @"text/json", @"text/plain", @"text/javascript", @"text/xml", @"image/*", nil] ;
+    
     [_config.allHTTPHeaderFields enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         [_sessionManager.requestSerializer setValue:obj forHTTPHeaderField:key] ;
     }] ;
@@ -270,16 +276,6 @@ static NSMutableArray <NSURLSessionTask *>*_allSessionTask;
         _config = [SINetworkConfig defaultConfig] ;
     }
     return _config ;
-}
-
-+ (void)setRequestSerializer:(SIRequestSerializerType)requestSerializer{
-    [self sharedConfig].requestSerializerType = requestSerializer ;
-    [self manager].requestSerializer = requestSerializer == SIRequestSerializerHTTP ? [AFHTTPRequestSerializer serializer] : [AFJSONRequestSerializer serializer] ;
-}
-
-+ (void)setResponseSerializer:(SIResponseSerializerType)responseSerializer{
-    [self sharedConfig].responseSerializerType = responseSerializer ;
-    [self manager].responseSerializer = responseSerializer == SIRequestSerializerJSON ? [AFJSONResponseSerializer serializer] : [AFHTTPResponseSerializer serializer] ;
 }
 
 + (void)setRequestTimeoutInterval:(NSTimeInterval)time{
@@ -362,15 +358,23 @@ static force_inline void hideNetworkActivityIndicator(){
     [self sharedConfig].cookieEnabled ? setCookie() : nil;
 }
 
+#pragma mark --- 日志
++ (void)setLogEnabel:(BOOL)enable {
+    _logEnable = enable;
+}
+
 + (void)logRequestCancel:(NSURLSessionDataTask *)task para:(NSDictionary *)para {
+    if (_logEnable) return;
     SILog(@"请求的地址是：%@\n上传的参数为：%@\n--->该请求已取消<---",task.currentRequest.URL,para);
 }
 
 + (void)logRequestSuccess:(NSURLSessionDataTask *)task para:(NSDictionary *)para response:(NSDictionary *)response {
+    if (!_logEnable) return;
     SILog(@"请求的地址是：%@\n上传的参数为：%@\n返回的数据:%@",task.currentRequest.URL,para,response);
 }
 
 + (void)logRequestFailure:(NSURLSessionDataTask *)task para:(NSDictionary *)para error:(NSError *)error {
+    if (!_logEnable) return;
     SILog(@"请求的地址是：%@\n上传的参数为：%@\n返回的错误:\n%@",task.currentRequest.URL,para,error);
 }
 
@@ -384,6 +388,9 @@ static force_inline void hideNetworkActivityIndicator(){
 
 + (NSDictionary *)convertResponse:(id)response withTask:(NSURLSessionDataTask *)task{
     if (!response) return @{@"result":@"没有任何数据"};
+    if ([response isKindOfClass:[NSDictionary class]]) {
+        return response;
+    }
     NSData *data = [NSData dataWithData:response];
     if ([task.response.textEncodingName compare:@"gbk" options:NSCaseInsensitiveSearch] == NSOrderedSame) {
         NSStringEncoding enc =CFStringConvertEncodingToNSStringEncoding(kCFStringEncodingGB_18030_2000);
@@ -395,28 +402,26 @@ static force_inline void hideNetworkActivityIndicator(){
         return @{@"result":response};
     }
     
-    // 转化为XML需要规定
-    if([self sharedConfig].responseSerializerType == SIResponseSerializerXML){
-        _YYXMLDictionaryParser *parser = [[_YYXMLDictionaryParser alloc] initWithData:data];
-        NSDictionary *dic = [parser result];
-        if ([NSJSONSerialization isValidJSONObject:dic]) {
-            return dic;
-        }
-        SILog(@"%@,返回的数据无法转换为可用XML格式，请检查",task.currentRequest.URL);
+    // 解析XML
+    _YYXMLDictionaryParser *parser = [[_YYXMLDictionaryParser alloc] initWithData:data];
+    NSDictionary *dic = [parser result];
+    if ([NSJSONSerialization isValidJSONObject:dic]) {
+        return dic;
     }
     
-    // 自动转化
-    NSDictionary *dic;
+    // 解析JSON
     dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
     if ([NSJSONSerialization isValidJSONObject:dic]) {
         return dic;
     }
     
+    // 转换为字符串
     NSString *str = [[NSString alloc]initWithData:response encoding:NSUTF8StringEncoding] ;
     if (str.length > 0) {
         return @{@"result":str} ;
     }
     
+    // 以data形式返回
     return @{@"result":response};
 }
 
@@ -435,20 +440,32 @@ static force_inline void hideNetworkActivityIndicator(){
                  succeess:(SIRequestSuccessBlock)success
                   failure:(SIRequestFailureBlock)failure{
     if(cacheResponse){
-        cacheResponse([SINetworkCache cacheForURL:url parameters:parameters]) ;
+        id cacheRep = [SINetworkCache cacheForURL:url parameters:parameters];
+        if(cacheRep && cacheResponse(cacheRep)){
+            // 缓存有效,返回
+            return nil;
+        }
     }
     [self networkCookieConfig];
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
     NSURLSessionDataTask *task = [[self manager] GET:url parameters:newParam progress:^(NSProgress * _Nonnull downloadProgress) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             progress ? progress(downloadProgress) : nil;
         });
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         removeSessionDataTask(task);
         hideNetworkActivityIndicator();
         NSDictionary *result = [self convertResponse:responseObject withTask:task];
-        cacheResponse ? [SINetworkCache setCache:result URL:url parameters:parameters] : nil;
+        // 如果请求成功保存缓存
+        if (result) {
+            // 处理返回结果,添加获取time
+            NSTimeInterval timeInterval = [NSDate date].timeIntervalSince1970;
+            NSString *timeString = [NSString stringWithFormat:@"%.0f",timeInterval];
+            NSMutableDictionary *cache = [NSMutableDictionary dictionaryWithDictionary:result];
+            [cache setObject:timeString forKey:@"cacheTime"];
+            [SINetworkCache setCache:cache URL:url parameters:parameters];
+        }
         success ? success(task, result) : nil;
         // 打印日志
         [self logRequestSuccess:task para:parameters response:result];
@@ -472,19 +489,33 @@ static force_inline void hideNetworkActivityIndicator(){
 }
 
 + (NSURLSessionTask *)POST:(NSString *)url parameters:(NSDictionary *)parameters progress:(SIRequestProgressBlock)progress cacheResponse:(SIRequestCacheBlock)cacheResponse success:(SIRequestSuccessBlock)success failure:(SIRequestFailureBlock)failure{
-    cacheResponse ? cacheResponse([SINetworkCache cacheForURL:url parameters:parameters]) : nil;
+    if(cacheResponse){
+        id cacheRep = [SINetworkCache cacheForURL:url parameters:parameters];
+        if(cacheRep && cacheResponse(cacheRep)){
+            // 缓存有效,返回
+           return nil;
+        }
+    }
     [self networkCookieConfig] ;
     showNetworkActivityIndicator();
     NSDictionary *newParam = [self addCommonParameters:parameters];
     NSURLSessionDataTask *sessionTask = [[self manager] POST:url parameters:newParam progress:^(NSProgress * _Nonnull uploadProgress) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             progress ? progress(uploadProgress) : nil;
         });
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
         hideNetworkActivityIndicator();
         removeSessionDataTask(task);
         NSDictionary *result = [self convertResponse:responseObject withTask:task];
-        cacheResponse ? [SINetworkCache setCache:result URL:url parameters:parameters] : nil;
+        // 请求成功保存缓存
+        if(result) {
+            // 处理结果,保存获取的时间戳
+            NSTimeInterval timeInterval = [NSDate date].timeIntervalSince1970;
+            NSString *timeString = [NSString stringWithFormat:@"%.0f",timeInterval];
+            NSMutableDictionary *cache = [NSMutableDictionary dictionaryWithDictionary:result];
+            [cache setObject:timeString forKey:@"cacheTime"];
+            [SINetworkCache setCache:cache URL:url parameters:parameters];
+        }
         success ? success(task, result) : nil;
         [self logRequestSuccess:task para:parameters response:result];
         
@@ -519,7 +550,7 @@ static force_inline void hideNetworkActivityIndicator(){
         (failure && error) ? failure([NSURLSessionDataTask new],error) : nil;
         error ? NSLog(@"上传失败") : nil;
     } progress:^(NSProgress * _Nonnull uploadProgress) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             progress ? progress(uploadProgress) : nil;
         });
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
@@ -583,7 +614,7 @@ static force_inline void hideNetworkActivityIndicator(){
             [formData appendPartWithFileData:data name:name fileName:fileNames[i] mimeType:imageType ? : [NSString stringWithFormat:@"image/jpg"]];
         }
     } progress:^(NSProgress * _Nonnull uploadProgress) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             progress ? progress(uploadProgress) : nil;
         });
     } success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
@@ -615,7 +646,7 @@ static force_inline void hideNetworkActivityIndicator(){
     NSURLSessionDownloadTask *task ;
     task = [[self manager] downloadTaskWithRequest:request progress:^(NSProgress * _Nonnull downloadProgress) {
         //下载进度
-        dispatch_sync(dispatch_get_main_queue(), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             progress ? progress(downloadProgress) : nil;
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
@@ -710,8 +741,24 @@ static force_inline void hideNetworkActivityIndicator(){
 
 @end
 
+@implementation NSDictionary (URL)
 
+- (NSString *)URLQueryString{
+    NSMutableString *string = [NSMutableString string];
+    for (NSString *key in [self allKeys]){
+        if ([string length]){
+            [string appendString:@"&"];
+        }
+        CFStringRef escaped = CFURLCreateStringByAddingPercentEscapes(NULL,(CFStringRef)[[self objectForKey:key] description],
+                                                                      NULL,(CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                                                      kCFStringEncodingUTF8);
+        [string appendFormat:@"%@=%@", key, escaped];
+        CFRelease(escaped);
+    }
+    return string;
+}
 
+@end
 
 @implementation UIImage (Compress)
 

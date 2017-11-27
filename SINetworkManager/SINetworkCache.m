@@ -15,6 +15,8 @@ static YYCache *_networkCache ;
 
 + (void)initialize{
     _networkCache = [YYCache cacheWithName:NetworkCacheName] ;
+    _networkCache.memoryCache.costLimit = 10*1024*1024; // 内存最多占用10M
+    _networkCache.diskCache.costLimit = 200*1024*1024; // 硬盘最多占用200M
 }
 
 + (void)setCache:(id)data URL:(NSString *)url parameters:(NSDictionary *)parameters{

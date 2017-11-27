@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-typedef void(^SIRequestCacheBlock)(id responseCache) ;///>  缓存Block
+typedef BOOL(^SIRequestCacheBlock)(id responseCache) ;///>  缓存Block,返回值表示是否有效,若为NO重新进行请求
 
 /** 缓存 */
 @interface SINetworkCache : NSObject

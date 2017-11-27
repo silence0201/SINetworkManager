@@ -32,6 +32,10 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 
 #pragma mark --- 网络状态
 #pragma mark -
++ (void)setLogEnabel:(BOOL)enable;
+
+#pragma mark --- 网络状态
+#pragma mark -
 /// 网络是否可用
 + (BOOL)isNetwork ;
 /// 是不是蜂窝煤网络
@@ -50,15 +54,10 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 /// 可获取当前的Config,某些属性设置就可以生效,但是不推荐使用
 + (SINetworkConfig *)sharedConfig;
 
-/// 设置请求参数格式
-+ (void)setRequestSerializer:(SIRequestSerializerType)requestSerializer ;
-/// 设置相应数据格式
-+ (void)setResponseSerializer:(SIResponseSerializerType)responseSerializer ;
-
 /// 设置请求超时时间,默认30s
 + (void)setRequestTimeoutInterval:(NSTimeInterval)time ;
 
-/// 设置请求头
+/// 设置公共请求头,会影响所有的请求
 + (void)setValue:(NSString *)value forHTTPHeaderField:(NSString *)field ;
 
 /// 设置是否打开网络状态菊花
@@ -75,7 +74,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
 #pragma mark --- 请求数据
 #pragma mark -
 /**
- 不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+ 不带缓存的GET请求,数据会自动转换字典,如果转换失败,会以@{@"result":reponse}格式返回
 
  @param url 请求地址
  @param parameters 请求参数
@@ -89,7 +88,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                   failure:(nullable SIRequestFailureBlock)failure;
 
 /**
- 带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+ 带缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
 
 
  @param url 请求地址
@@ -108,7 +107,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                   failure:(nullable SIRequestFailureBlock)failure;
 
 /**
- 不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+ 不带缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
 
  @param url 请求地址
  @param parameters 请求参数
@@ -122,7 +121,7 @@ typedef void(^SIRequestProgressBlock)(NSProgress *progress) ; ///> 进度Block
                    failure:(nullable SIRequestFailureBlock)failure;
 
 /**
- 不带缓存的GET请求,数据会自动转换为JSON,解析XML需要设置ResponseSerializer,如果转换失败,会以@{@"result":reponse}格式返回
+ 带缓存的GET请求,数据会自动转换为字典,如果转换失败,会以@{@"result":reponse}格式返回
 
  @param url 请求地址
  @param parameters 请求参数

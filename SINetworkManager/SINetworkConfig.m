@@ -17,7 +17,6 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         config = [[self alloc]init] ;
-        
     });
     return config ;
 }
@@ -44,8 +43,6 @@
 - (NSDictionary *)allHTTPHeaderFields{
     return _httpHeaderDic.copy ;
 }
-
-
 
 @end
 

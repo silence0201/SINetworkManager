@@ -8,16 +8,16 @@
 
 #import <Foundation/Foundation.h>
 
-typedef NS_ENUM(NSInteger,SIRequestSerializerType){
-    SIRequestSerializerHTTP = 0, ///< 请求的数据格式为二进制数据
-    SIRequestSerializerJSON     ///< 请求数据为JSON格式
-};
-
-typedef NS_ENUM(NSInteger,SIResponseSerializerType){
-    SIResponseSerializerHTTP = 0, ///< 返回的数据格式为二进制数据
-    SIResponseSerializerJSON,     ///< 返回数据为JSON格式
-    SIResponseSerializerXML       ///< 返回的数据为XML
-};
+//typedef NS_ENUM(NSInteger,SIRequestSerializerType){
+//    SIRequestSerializerHTTP = 0, ///< 请求的数据格式为二进制数据
+//    SIRequestSerializerJSON     ///< 请求数据为JSON格式
+//};
+//
+//typedef NS_ENUM(NSInteger,SIResponseSerializerType){
+//    SIResponseSerializerHTTP = 0, ///< 返回的数据格式为二进制数据
+//    SIResponseSerializerJSON,     ///< 返回数据为JSON格式
+//    SIResponseSerializerXML       ///< 返回的数据为XML
+//};
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -30,11 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic,copy) NSDictionary *commonParas ;
 /// 超时时间,默认为30s
 @property (nonatomic,assign) NSTimeInterval timeoutInterval ;
-
-/// 请求数据类型,默认是二进制类型
-@property (nonatomic,assign) SIRequestSerializerType requestSerializerType ;
-/// 返回数据类型,默认是二进制
-@property (nonatomic,assign) SIResponseSerializerType responseSerializerType ;
 
 /// 是否显示转动的菊花
 @property (nonatomic,assign) BOOL networkActivityIndicatorEnabled ;

@@ -17,18 +17,29 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [SINetworkManager setResponseSerializer:SIResponseSerializerXML] ;
-    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/note.xml" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+    
+    // [SINetworkManager setLogEnabel:NO];  // 是否开启日志打印功能,默认为YES
+    
+    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/plant_catalog.xml" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
     } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
-        
-    }] ;
 
-    [SINetworkManager setResponseSerializer:SIResponseSerializerJSON] ;
-    [SINetworkManager GET:@"https://api.douban.com/v2/movie/coming_soon" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
-        NSLog(@"请求成功:%@",responseObject) ;
-    } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
-        NSLog(@"请求失败:%@",error) ;
     }] ;
+    
+    [SINetworkManager GET:@"https://api.douban.com/v2/movie/coming_soon" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+        // NSLog(@"请求成功:%@",responseObject) ;
+    } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
+        // NSLog(@"请求失败:%@",error) ;
+    }] ;
+    
+    // 缓存效果测试1
+    // NSDictionary *cache1 = [SINetworkCache cacheForURL:@"http://www.w3school.com.cn/example/xmle/plant_catalog.xml"  parameters:nil];
+    // NSLog(@"%@",cache1);
+    
+    // 缓存效果测试2
+    // NSDictionary *cache2 = [SINetworkCache cacheForURL:@"https://api.douban.com/v2/movie/coming_soon" parameters:nil];
+    // NSLog(@"%@",cache2);
+    
+    
 }
 
 - (void)networkStatusChange {
