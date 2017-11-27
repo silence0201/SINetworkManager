@@ -8,17 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-//typedef NS_ENUM(NSInteger,SIRequestSerializerType){
-//    SIRequestSerializerHTTP = 0, ///< 请求的数据格式为二进制数据
-//    SIRequestSerializerJSON     ///< 请求数据为JSON格式
-//};
-//
-//typedef NS_ENUM(NSInteger,SIResponseSerializerType){
-//    SIResponseSerializerHTTP = 0, ///< 返回的数据格式为二进制数据
-//    SIResponseSerializerJSON,     ///< 返回数据为JSON格式
-//    SIResponseSerializerXML       ///< 返回的数据为XML
-//};
-
 NS_ASSUME_NONNULL_BEGIN
 
 /** 配置 */
