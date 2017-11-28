@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "SINetworkManager"
-  s.version      = "1.0.2"
+  s.version      = "1.0.3"
   s.summary      = "A NetworkManager With AFNetworking And YYCache."
   s.description  = <<-DESC
                       A Network Manager With AFNetworking And YYCache
