@@ -2,13 +2,13 @@
 //  SINetworkCache.h
 //  SINetworkManagerDemo
 //
-//  Created by 杨晴贺 on 2017/3/9.
+//  Created by Silence on 2017/3/9.
 //  Copyright © 2017年 Silence. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-typedef void(^SIRequestCacheBlock)(id responseCache) ;///>  缓存Block
+typedef BOOL(^SIRequestCacheBlock)(id responseCache) ;///>  缓存Block,返回值表示是否有效,若为NO重新进行请求
 
 /** 缓存 */
 @interface SINetworkCache : NSObject
