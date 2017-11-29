@@ -20,7 +20,9 @@
     
     // [SINetworkManager setLogEnabel:NO];  // 是否开启日志打印功能,默认为YES
     
-    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/plant_catalog.xml" parameters:nil succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
+    NSDictionary *params = @{@"Test":@"123",@"Test2":@"456"};
+    
+    [SINetworkManager GET:@"http://www.w3school.com.cn/example/xmle/plant_catalog.xml" parameters:params succeess:^(NSURLSessionTask * _Nonnull task, NSDictionary * _Nonnull responseObject) {
     } failure:^(NSURLSessionTask * _Nonnull task, NSError * _Nonnull error) {
 
     }] ;

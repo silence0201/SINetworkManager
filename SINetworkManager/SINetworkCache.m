@@ -8,6 +8,7 @@
 
 #import "SINetworkCache.h"
 #import <YYCache/YYCache.h>
+#import <CommonCrypto/CommonDigest.h>
 
 static NSString *const NetworkCacheName = @"SINetworkCache" ;
 static YYCache *_networkCache ;
@@ -52,15 +53,49 @@ static YYCache *_networkCache ;
 
 #pragma mark --- 私有方法
 + (NSString *)_keyWithURL:(NSString *)url paramters:(NSDictionary *)para{
-    if (!para)  return url ;
+    NSString *key;
+    if (!para) {
+        key = url;
+    }else {
+        NSMutableString *paraString = [NSMutableString string];
+        for (NSString *key in [para allKeys]){
+            if ([paraString length]){
+                [paraString appendString:@"&"];
+            }
+            [paraString appendFormat:@"%@=%@", key, [para objectForKey:key]];
+        }
+        // 拼接
+        key = [NSString stringWithFormat:@"%@?%@",url,paraString] ;
+    }
     
-    NSData *stringData = [NSJSONSerialization dataWithJSONObject:para options:0 error:nil] ;
-    NSString *paraString = [[NSString alloc]initWithData:stringData encoding:NSUTF8StringEncoding] ;
-    
-    // 拼接
-    NSString *cacheKey = [NSString stringWithFormat:@"%@%@",url,paraString] ;
-    
-    return cacheKey ;
+    // MD5 From SDWebImage
+    const char *str = key.UTF8String;
+    if (str == NULL) {
+        str = "";
+    }
+    unsigned char r[CC_MD5_DIGEST_LENGTH];
+    CC_MD5(str, (CC_LONG)strlen(str), r);
+    NSURL *keyURL = [NSURL URLWithString:key];
+    NSString *ext = keyURL ? keyURL.pathExtension : key.pathExtension;
+    NSString *filename = [NSString stringWithFormat:@"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%@",
+                          r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10],
+                          r[11], r[12], r[13], r[14], r[15], ext.length == 0 ? @"" : [NSString stringWithFormat:@".%@", ext]];
+    return filename ;
+}
+
+@end
+
+@implementation NSDictionary (URL)
+
+- (NSString *)URLQueryString{
+    NSMutableString *string = [NSMutableString stringWithString:@"?"];
+    for (NSString *key in [self allKeys]){
+        if ([string length]){
+            [string appendString:@"&"];
+        }
+        [string appendFormat:@"%@=%@", key, [self objectForKey:key]];
+    }
+    return string;
 }
 
 @end
